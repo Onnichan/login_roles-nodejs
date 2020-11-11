@@ -8,7 +8,13 @@ export class UserController {
 
     static getAll = async (req,res)=> {
         const userRepository = getRepository(User);
-        const users = await userRepository.find()
+        let users;
+        try{
+            users = await userRepository.find()
+        }catch(e){
+            res.status(404).json({ message : 'Something goes wrong'});
+        }
+
 
         if(users.length > 0){
             res.send(users);
@@ -39,7 +45,8 @@ export class UserController {
 
 
         //validate
-        const errors = await validate(user);
+        const validationOption = { validationError:{ target: false, value: false }}
+        const errors = await validate(user, validationOption);
         if(errors.length > 0){
             return res.status(400).json(errors);
         }
@@ -74,8 +81,11 @@ export class UserController {
 
         user.username = username;
         user.role = role;
-
-        const errors = await validate(user);
+        
+        const validationOption = { validationError:{ target: false, value: false }}
+        const errors = await validate(user, validationOption);
+        console.log('ERROR->',errors);
+        
 
         if(errors.length > 0){
             return res.status(400).json(errors);
